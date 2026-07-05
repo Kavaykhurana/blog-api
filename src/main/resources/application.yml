@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/blog_db
-    username: kavaykhurana
-    password: ""
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/blog_db}
+    username: ${SPRING_DATASOURCE_USERNAME:kavaykhurana}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     show-sql: true
     properties:
       hibernate:
@@ -15,5 +15,5 @@ spring:
 
 app:
   jwt:
-    secret: "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437" # 256-bit Hex Key
-    expiration-ms: 86400000 # 24 hours
+    secret: ${JWT_SECRET:5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
