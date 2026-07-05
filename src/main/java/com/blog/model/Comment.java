@@ -128,4 +128,14 @@ public class Comment {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public void addReply(Comment reply) {
+        replies.add(reply);
+        reply.setParent(this);
+    }
+
+    public void removeReply(Comment reply) {
+        replies.remove(reply);
+        reply.setParent(null);
+    }
 }
