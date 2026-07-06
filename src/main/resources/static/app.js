@@ -41,7 +41,7 @@ function showToast(message, type = 'success') {
 
   toast.innerHTML = `
     ${icon}
-    <div style="font-size: 0.9rem; font-weight: 500;">${message}</div>
+    <div style="font-size: 0.85rem; font-weight: 500;">${message}</div>
     <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
   `;
 
@@ -270,7 +270,7 @@ async function loadFeed() {
   const grid = document.getElementById('posts-grid');
   
   grid.innerHTML = '';
-  loading.style.display = 'block';
+  loading.style.display = 'grid'; // Grid is used for skeleton card placements
   empty.style.display = 'none';
 
   // Construct Query Params
@@ -445,8 +445,8 @@ async function loadPostDetail(id) {
       year: 'numeric'
     });
 
-    // Content body (HTML rendering or text)
-    document.getElementById('post-detail-content').innerHTML = post.content.replace(/\n/g, '<br>');
+    // Content body with Markdown Parser
+    document.getElementById('post-detail-content').innerHTML = parseMarkdown(post.content);
 
     // Categories
     const catContainer = document.getElementById('post-detail-categories');
@@ -602,7 +602,7 @@ function buildCommentNode(comment) {
   if (state.currentUser) {
     actionButtons += `
       <button class="comment-action-btn" onclick="showReplyForm(${comment.id})">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="15 3 21 3 21 9"></polygon><path d="M9 18v-6H3v6h6z"></path><path d="M21 3l-6 6"></path><path d="M21 9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h8"></path></svg>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="15 3 21 3 21 9"></polygon><path d="M9 18v-6H3v6h6z"></path><path d="M21 3l-6 6"></path><path d="M21 9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h8"></path></svg>
         Reply
       </button>
     `;
@@ -754,6 +754,8 @@ async function openEditor(postId = null) {
   document.getElementById('edit-post-id').value = postId || '';
   const titleEl = document.getElementById('editor-title');
   const submitBtnEl = document.getElementById('editor-submit-btn');
+  const previewBox = document.getElementById('post-preview-box');
+  previewBox.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">Preview will appear here as you type...</span>';
 
   if (postId) {
     titleEl.innerText = 'Edit Post';
@@ -771,6 +773,9 @@ async function openEditor(postId = null) {
       
       document.getElementById('post-categories').value = catsStr;
       document.getElementById('post-tags').value = tagsStr;
+      
+      // Initial Preview
+      previewBox.innerHTML = parseMarkdown(post.content);
     } catch (err) {
       showToast('Failed to load post data for editing.', 'error');
       window.location.hash = '#/';
@@ -782,8 +787,10 @@ async function openEditor(postId = null) {
 }
 
 // ==========================================================================
-// 5. USER PROFILE SCREEN
+// 5. USER PROFILE SCREEN & EDIT DIALOG
 // ==========================================================================
+let activeProfileId = null;
+
 async function loadProfile() {
   const myPostsGrid = document.getElementById('my-posts-grid');
   myPostsGrid.innerHTML = '<div style="text-align:center; grid-column: 1/-1;">Loading your posts...</div>';
@@ -791,10 +798,11 @@ async function loadProfile() {
   try {
     // 1. Load active user profile metadata
     const user = await api.get('/auth/me');
+    activeProfileId = user.id;
     
     document.getElementById('profile-display-name').innerText = user.displayName;
     document.getElementById('profile-username').innerText = `@${user.username}`;
-    document.getElementById('profile-bio').innerText = user.bio || 'No bio written yet. Edit profile to write something!';
+    document.getElementById('profile-bio').innerText = user.bio || 'No bio written yet.';
     
     const initial = user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U';
     document.getElementById('profile-avatar').innerText = initial;
@@ -852,6 +860,37 @@ async function loadProfile() {
 
   } catch (err) {
     myPostsGrid.innerHTML = '<div style="text-align:center; grid-column: 1/-1; color: var(--danger);">Failed to load profile dashboard details.</div>';
+  }
+}
+
+function openProfileDialog() {
+  const currentDisplayName = document.getElementById('profile-display-name').innerText;
+  const currentBio = document.getElementById('profile-bio').innerText;
+
+  document.getElementById('profile-edit-displayname').value = currentDisplayName;
+  document.getElementById('profile-edit-bio').value = currentBio === 'No bio written yet.' ? '' : currentBio;
+  
+  document.getElementById('profile-dialog').showModal();
+}
+
+function closeProfileDialog() {
+  document.getElementById('profile-dialog').close();
+}
+
+async function saveProfile(event) {
+  event.preventDefault();
+  const displayName = document.getElementById('profile-edit-displayname').value.trim();
+  const bio = document.getElementById('profile-edit-bio').value.trim();
+
+  if (!activeProfileId) return;
+
+  try {
+    await api.put(`/users/${activeProfileId}`, { displayName, bio });
+    showToast('Profile updated successfully.');
+    closeProfileDialog();
+    loadProfile();
+  } catch (err) {
+    showToast('Failed to update profile.', 'error');
   }
 }
 
@@ -1010,7 +1049,47 @@ function setupDialogLightDismiss() {
 }
 
 // ==========================================================================
-// Form Action Submissions
+// Markdown Client Parser Logic (HTML Safe & Self-Contained)
+// ==========================================================================
+function parseMarkdown(text) {
+  if (!text) return '<span style="color: var(--text-muted); font-style: italic;">Preview will appear here as you type...</span>';
+  
+  // HTML Escape first
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Headers
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+  // Code Blocks
+  html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+  // Inline Code
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+  // Bold & Italic
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+  // Lists (unordered)
+  html = html.replace(/^\s*[\-\*]\s+(.*$)/gim, '<li>$1</li>');
+
+  // Line breaks segment mapping
+  let segments = html.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (let i = 0; i < segments.length; i++) {
+    if (!segments[i].startsWith('<pre>')) {
+      segments[i] = segments[i].replace(/\n/g, '<br>');
+    }
+  }
+  return segments.join('');
+}
+
+// ==========================================================================
+// Form Action Submissions & Listeners
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   // Load local auth
@@ -1039,7 +1118,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Login Form Submit
+  // 2. Split Screen Markdown Editor Sync Listener
+  const contentTextarea = document.getElementById('post-content');
+  if (contentTextarea) {
+    contentTextarea.addEventListener('input', (e) => {
+      const previewBox = document.getElementById('post-preview-box');
+      previewBox.innerHTML = parseMarkdown(e.target.value);
+    });
+  }
+
+  // 3. Login Form Submit
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -1058,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Register Form Submit
+  // 4. Register Form Submit
   const regForm = document.getElementById('register-form');
   if (regForm) {
     regForm.addEventListener('submit', async (e) => {
@@ -1079,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Post Form Editor Submit
+  // 5. Post Form Editor Submit
   const editorForm = document.getElementById('post-editor-form');
   if (editorForm) {
     editorForm.addEventListener('submit', async (e) => {
@@ -1120,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Main Top-Level Comment Form Submit
+  // 6. Main Top-Level Comment Form Submit
   const mainCommentForm = document.getElementById('comment-form');
   if (mainCommentForm) {
     mainCommentForm.addEventListener('submit', async (e) => {
