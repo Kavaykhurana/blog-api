@@ -25,6 +25,9 @@ public class LikeService {
     }
 
     public boolean toggleLike(Long postId, User user) {
+        if (user == null) {
+            throw new com.blog.exception.UnauthorizedException("User is not authenticated or not found");
+        }
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 

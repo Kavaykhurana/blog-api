@@ -56,6 +56,9 @@ public class PostService {
     }
 
     public PostResponse createPost(PostRequest request, User user) {
+        if (user == null) {
+            throw new UnauthorizedException("User is not authenticated or not found");
+        }
         Post post = new Post();
         post.setAuthor(user);
         post.setTitle(request.title());
@@ -115,6 +118,9 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PagedResponse<PostResponse> getMyPosts(int page, int size, User user) {
+        if (user == null) {
+            throw new UnauthorizedException("User is not authenticated or not found");
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Specification<Post> spec = PostSpecification.hasAuthor(user);
         Page<Post> posts = postRepository.findAll(spec, pageable);

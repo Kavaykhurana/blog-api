@@ -40,6 +40,9 @@ public class CommentService {
     }
 
     public CommentResponse addComment(Long postId, CommentRequest request, User user) {
+        if (user == null) {
+            throw new UnauthorizedException("User is not authenticated or not found");
+        }
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
