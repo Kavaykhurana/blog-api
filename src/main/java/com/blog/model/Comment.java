@@ -37,7 +37,6 @@ public class Comment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructors
     public Comment() {}
 
     public Comment(Post post, User author, String content) {
@@ -64,7 +63,6 @@ public class Comment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

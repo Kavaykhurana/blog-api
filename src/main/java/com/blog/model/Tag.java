@@ -13,14 +13,12 @@ public class Tag {
     @Column(nullable = false, unique = true)
     private String name;
 
-    // Constructors
     public Tag() {}
 
     public Tag(String name) {
         this.name = name;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

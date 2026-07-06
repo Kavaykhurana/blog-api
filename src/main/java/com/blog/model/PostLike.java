@@ -20,7 +20,6 @@ public class PostLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Constructors
     public PostLike() {}
 
     public PostLike(Post post, User user) {
@@ -28,7 +27,6 @@ public class PostLike {
         this.user = user;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

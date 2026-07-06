@@ -16,7 +16,6 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Constructors
     public Category() {}
 
     public Category(String name, String description) {
@@ -24,7 +23,6 @@ public class Category {
         this.description = description;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

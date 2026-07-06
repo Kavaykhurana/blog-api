@@ -35,7 +35,6 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructors
     public User() {}
 
     public User(String username, String email, String password, String displayName, String bio, String role) {
@@ -58,7 +57,6 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

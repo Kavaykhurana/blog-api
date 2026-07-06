@@ -61,7 +61,6 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostLike> likes = new HashSet<>();
 
-    // Constructors
     public Post() {}
 
     public Post(User author, String title, String content, String excerpt, PostStatus status) {
@@ -89,7 +88,6 @@ public class Post {
         }
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

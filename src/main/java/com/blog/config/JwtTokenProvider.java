@@ -41,7 +41,6 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Generate token
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
         Date now = new Date();
@@ -55,7 +54,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Generate token by username directly
     public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -68,7 +66,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Get username from JWT token
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -79,7 +76,6 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // Validate JWT token
     public boolean validateToken(String authToken) {
         try {
             Jwts.parser()
