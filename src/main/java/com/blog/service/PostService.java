@@ -139,7 +139,7 @@ public class PostService {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
-        if (!post.getAuthor().getId().equals(currentUser.getId())) {
+        if (currentUser == null || (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN"))) {
             throw new UnauthorizedException("You are not authorized to edit this post");
         }
 
@@ -168,7 +168,7 @@ public class PostService {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
-        if (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN")) {
+        if (currentUser == null || (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN"))) {
             throw new UnauthorizedException("You are not authorized to delete this post");
         }
 

@@ -80,7 +80,7 @@ public class CommentService {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
 
-        if (!comment.getAuthor().getId().equals(currentUser.getId())) {
+        if (currentUser == null || (!comment.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN"))) {
             throw new UnauthorizedException("You are not authorized to edit this comment");
         }
 
@@ -93,7 +93,7 @@ public class CommentService {
         Comment comment = commentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
 
-        if (!comment.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN")) {
+        if (currentUser == null || (!comment.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().equals("ROLE_ADMIN"))) {
             throw new UnauthorizedException("You are not authorized to delete this comment");
         }
 

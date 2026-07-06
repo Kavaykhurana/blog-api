@@ -15,6 +15,7 @@ public class PostSpecification {
             if (category == null || category.trim().isEmpty()) {
                 return null;
             }
+            query.distinct(true);
             Join<Post, Category> categoryJoin = root.join("categories");
             return cb.equal(cb.lower(categoryJoin.get("name")), category.trim().toLowerCase());
         };
@@ -25,6 +26,7 @@ public class PostSpecification {
             if (tag == null || tag.trim().isEmpty()) {
                 return null;
             }
+            query.distinct(true);
             Join<Post, Tag> tagJoin = root.join("tags");
             return cb.equal(cb.lower(tagJoin.get("name")), tag.trim().toLowerCase());
         };
