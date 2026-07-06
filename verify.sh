@@ -131,7 +131,7 @@ EOF
 RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/auth/register" "" "$REG_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 REG_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
-check_http_code "$HTTP_CODE" 200 "User Registration"
+check_http_code "$HTTP_CODE" 201 "User Registration"
 echo "Registration Response:"
 format_json "$REG_RESPONSE"
 echo ""
@@ -201,7 +201,7 @@ EOF
 RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/categories" "-H Authorization: Bearer ${ADMIN_TOKEN}" "$CAT_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 CAT_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
-check_http_code "$HTTP_CODE" 200 "Category Creation"
+check_http_code "$HTTP_CODE" 201 "Category Creation"
 CATEGORY_ID=$(get_json_field "$CAT_RESPONSE" "id")
 echo "Category Created:"
 format_json "$CAT_RESPONSE"
@@ -247,7 +247,7 @@ EOF
 RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "-H Authorization: Bearer ${USER_TOKEN}" "$COMMENT_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 COMMENT_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
-check_http_code "$HTTP_CODE" 200 "Comment Creation"
+check_http_code "$HTTP_CODE" 201 "Comment Creation"
 echo "Comment Posted:"
 format_json "$COMMENT_RESPONSE"
 
@@ -271,7 +271,7 @@ EOF
 RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "-H Authorization: Bearer ${USER_TOKEN}" "$REPLY_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 REPLY_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
-check_http_code "$HTTP_CODE" 200 "Reply Creation"
+check_http_code "$HTTP_CODE" 201 "Reply Creation"
 REPLY_ID=$(get_json_field "$REPLY_RESPONSE" "id")
 echo "Nested Reply Response:"
 format_json "$REPLY_RESPONSE"
