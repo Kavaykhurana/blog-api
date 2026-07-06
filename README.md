@@ -6,6 +6,21 @@ The application is deployed live on Railway at: **[https://blog-api-production-4
 
 ---
 
+## 🎨 Interactive Premium Front-End Portal
+
+The application now serves a high-fidelity, single-page application (SPA) front-end directly from the root `/` URL. Built using **modern semantic HTML5**, **custom responsive Vanilla CSS**, and **pure native JavaScript**, it features:
+
+* **Sleek Glassmorphic Design**: A modern dark-mode-first aesthetic with glowing borders, translucent backdrops (`backdrop-filter: blur`), responsive layout grids, and clean visual structures.
+* **Hash-based Client-Side Router**: Enables natural back/forward navigation history (`#/`, `#/post/123`, `#/profile`, `#/admin`) without reloading the page.
+* **Stateless Auth Integration**: Login/Registration UI forms that persist JWT bearer tokens inside local storage and dynamically update navigation menus.
+* **Interactive Post Feed**: View posts with dynamic text-match keyword searching and tag/category filtering chips. Supports client-side pagination.
+* **Threaded Comment Tree**: Recursively renders nested, hierarchical comment threads. Authenticated users can post replies, edit, or delete comments inline.
+* **Pulsing Like Button**: Custom micro-interactions with pulsing SVG heart animations that show live like states and counters.
+* **Dashboard Profile**: User portal showing written posts (both drafts and published) with edit/delete shortcuts and user stats.
+* **Admin Control Center**: Built-in tables for administrators (`admin` / `admin123`) to perform CRUD operations on categories and tags directly.
+
+---
+
 ## 🚀 Key Features
 
 * **Stateless Security**: Secure endpoints using Spring Security 6.x and JWT (JSON Web Tokens via JJWT 0.12.5) with BCrypt password hashing and Role-Based Access Control (RBAC).
