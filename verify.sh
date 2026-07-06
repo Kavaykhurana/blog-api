@@ -32,19 +32,24 @@ REPLY_ID=""
 make_request() {
   local method="$1"
   local url="$2"
-  local headers="$3"
+  local token="$3"
   local body="$4"
   local response_file=$(mktemp)
   local http_code
+  local auth_header_arg=()
+
+  if [ -n "$token" ]; then
+    auth_header_arg=(-H "Authorization: Bearer ${token}")
+  fi
 
   if [ -n "$body" ]; then
     http_code=$(curl -s -o "$response_file" -w "%{http_code}" -X "$method" "$url" \
       -H "Content-Type: application/json" \
-      $headers \
+      "${auth_header_arg[@]}" \
       -d "$body")
   else
     http_code=$(curl -s -o "$response_file" -w "%{http_code}" -X "$method" "$url" \
-      $headers)
+      "${auth_header_arg[@]}")
   fi
 
   local response_body=$(cat "$response_file")
@@ -159,7 +164,7 @@ fi
 echo -e "${GREEN}USER_TOKEN captured successfully.${NC}\n"
 
 # Get User ID for Cleanup
-ME_RESPONSE=$(make_request "GET" "${BASE_URL}/api/v1/auth/me" "-H Authorization: Bearer ${USER_TOKEN}" "")
+ME_RESPONSE=$(make_request "GET" "${BASE_URL}/api/v1/auth/me" "${USER_TOKEN}" "")
 ME_HTTP_CODE=$(echo "$ME_RESPONSE" | cut -d'|' -f1)
 ME_BODY=$(echo "$ME_RESPONSE" | cut -d'|' -f2-)
 check_http_code "$ME_HTTP_CODE" 200 "Fetching User Profile"
@@ -198,7 +203,7 @@ CAT_BODY=$(cat <<EOF
 EOF
 )
 
-RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/categories" "-H Authorization: Bearer ${ADMIN_TOKEN}" "$CAT_BODY")
+RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/categories" "${ADMIN_TOKEN}" "$CAT_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 CAT_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
 check_http_code "$HTTP_CODE" 201 "Category Creation"
@@ -221,7 +226,7 @@ POST_BODY=$(cat <<EOF
 EOF
 )
 
-RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts" "-H Authorization: Bearer ${USER_TOKEN}" "$POST_BODY")
+RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts" "${USER_TOKEN}" "$POST_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 POST_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
 check_http_code "$HTTP_CODE" 201 "Post Creation"
@@ -244,7 +249,7 @@ COMMENT_BODY=$(cat <<EOF
 EOF
 )
 
-RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "-H Authorization: Bearer ${USER_TOKEN}" "$COMMENT_BODY")
+RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "${USER_TOKEN}" "$COMMENT_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 COMMENT_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
 check_http_code "$HTTP_CODE" 201 "Comment Creation"
@@ -268,7 +273,7 @@ REPLY_BODY=$(cat <<EOF
 EOF
 )
 
-RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "-H Authorization: Bearer ${USER_TOKEN}" "$REPLY_BODY")
+RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/comments" "${USER_TOKEN}" "$REPLY_BODY")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 REPLY_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
 check_http_code "$HTTP_CODE" 201 "Reply Creation"
@@ -279,7 +284,7 @@ echo ""
 
 # 8. Like and Get Posts Page
 echo -e "${BLUE}[8/8] Toggling like on the post and fetching the posts page...${NC}"
-RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/like" "-H Authorization: Bearer ${USER_TOKEN}" "")
+RESPONSE=$(make_request "POST" "${BASE_URL}/api/v1/posts/${POST_ID}/like" "${USER_TOKEN}" "")
 HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
 LIKE_RESPONSE=$(echo "$RESPONSE" | cut -d'|' -f2-)
 check_http_code "$HTTP_CODE" 200 "Toggling Like"
