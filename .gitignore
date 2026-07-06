@@ -29,3 +29,8 @@ target/
 ## OS ##
 .DS_Store
 Thumbs.db
+
+# Screenshots and temp items
+*.png
+Screenshot*
+
